@@ -16,6 +16,7 @@ from pysot.tracker.base_tracker import SiameseTracker
 class SiamRPNTracker(SiameseTracker):
     def __init__(self, model):
         super(SiamRPNTracker, self).__init__()
+        # Generate anchors
         self.score_size = (cfg.TRACK.INSTANCE_SIZE - cfg.TRACK.EXEMPLAR_SIZE) // \
             cfg.ANCHOR.STRIDE + 1 + cfg.TRACK.BASE_SIZE
         self.anchor_num = len(cfg.ANCHOR.RATIOS) * len(cfg.ANCHOR.SCALES)
@@ -23,8 +24,12 @@ class SiamRPNTracker(SiameseTracker):
         window = np.outer(hanning, hanning)
         self.window = np.tile(window.flatten(), self.anchor_num)
         self.anchors = self.generate_anchor(self.score_size)
+
         self.model = model
         self.model.eval()
+
+    def convert_tensorrt(self, input, stage):
+        self.model.convert_tensorrt(input, stage)
 
     def generate_anchor(self, score_size):
         anchors = Anchors(cfg.ANCHOR.STRIDE,
@@ -88,6 +93,7 @@ class SiamRPNTracker(SiameseTracker):
         z_crop = self.get_subwindow(img, self.center_pos,
                                     cfg.TRACK.EXEMPLAR_SIZE,
                                     s_z, self.channel_average)
+        # import pdb; pdb.set_trace()
         self.model.template(z_crop)
 
     def track(self, img):
@@ -97,6 +103,7 @@ class SiamRPNTracker(SiameseTracker):
         return:
             bbox(list):[x, y, width, height]
         """
+
         w_z = self.size[0] + cfg.TRACK.CONTEXT_AMOUNT * np.sum(self.size)
         h_z = self.size[1] + cfg.TRACK.CONTEXT_AMOUNT * np.sum(self.size)
         s_z = np.sqrt(w_z * h_z)
@@ -105,6 +112,9 @@ class SiamRPNTracker(SiameseTracker):
         x_crop = self.get_subwindow(img, self.center_pos,
                                     cfg.TRACK.INSTANCE_SIZE,
                                     round(s_x), self.channel_average)
+        # print(x_crop.shape)
+        print(w_z, h_z, s_z, scale_z)
+    
 
         outputs = self.model.track(x_crop)
 

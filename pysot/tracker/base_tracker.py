@@ -35,6 +35,8 @@ class BaseTracker(object):
 
 
 class SiameseTracker(BaseTracker):
+
+    ## get sub window of an image, use padding to convert original size to model size(normally 127x127), method using: average padding
     def get_subwindow(self, im, pos, model_sz, original_sz, avg_chans):
         """
         args:
@@ -65,7 +67,11 @@ class SiameseTracker(BaseTracker):
         context_ymin = context_ymin + top_pad
         context_ymax = context_ymax + top_pad
 
+        # print(context_xmin, context_xmax, context_ymin, context_ymax)
+        # print(left_pad, top_pad, right_pad, bottom_pad)
+
         r, c, k = im.shape
+
         if any([top_pad, bottom_pad, left_pad, right_pad]):
             size = (r + top_pad + bottom_pad, c + left_pad + right_pad, k)
             te_im = np.zeros(size, np.uint8)

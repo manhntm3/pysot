@@ -50,7 +50,6 @@ class UPChannelRPN(RPN):
         loc = self.loc_adjust(xcorr_fast(loc_feature, loc_kernel))
         return cls, loc
 
-
 class DepthwiseXCorr(nn.Module):
     def __init__(self, in_channels, hidden, out_channels, kernel_size=3, hidden_kernel_size=5):
         super(DepthwiseXCorr, self).__init__()
@@ -70,7 +69,6 @@ class DepthwiseXCorr(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Conv2d(hidden, out_channels, kernel_size=1)
                 )
-        
 
     def forward(self, kernel, search):
         kernel = self.conv_kernel(kernel)
@@ -78,7 +76,6 @@ class DepthwiseXCorr(nn.Module):
         feature = xcorr_depthwise(search, kernel)
         out = self.head(feature)
         return out
-
 
 class DepthwiseRPN(RPN):
     def __init__(self, anchor_num=5, in_channels=256, out_channels=256):
